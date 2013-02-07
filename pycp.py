@@ -12,6 +12,7 @@ dest = '/home/ecko/cptest/to'
 num_threads = 5
 queue = Queue()
 files = os.listdir(source)
+
 def pycp(i, q):
     """
     Copy files
@@ -22,10 +23,8 @@ def pycp(i, q):
         cp_file = "{0}/{1}".format(source, f)
         cp = copy(cp_file, dest)
 
-        if cp == 0:
-            print '{0}: is alive'.format(f)
-        else:
-            print '{0}: did not respond'.format(f)
+        #if cp == 0:
+        #    print '{0}: is alive'.format(f)
         q.task_done()
 
 for i in range(num_threads):
