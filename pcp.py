@@ -47,6 +47,10 @@ class pcp():
                     help='Directory location')
 
         self.args = parser.parse_args()
+
+        self.root = self.args.SOURCE[0]
+
+        root = self.root
         
         return self.args
 
@@ -81,7 +85,6 @@ class pcp():
         Build paths and place them in array which can be passed to the queue
         """
         
-        from Queue import Queue
 
         self.paths = []
         self.queue = Queue()
@@ -92,7 +95,6 @@ class pcp():
             for self.key, self.files in self.d.items():
                 for self.file in self.files:
                     self.string = '{0}/{1}'.format(self.key, self.file)
-                    #paths.append(self.string)
                     self.queue.put(self.string)
         return self.queue
 
@@ -127,20 +129,43 @@ class pcp():
         except (KeyError, ValueError):
             pass
 
-    def workers(self, queue, cpu=0):
+    def cp(self, queue, dest):
+        """
+        Handle the copying of files
+        """
+
+
+        while True:
+
+            self.f = queue.get()
+
+            self.dest_path = self.f.replace(self.root, '')
+            self.path = "{0}{1}".format(dest,self.dest_path)
+            
+            self.cpy = copy(self.f, self.path)
+
+            queue.task_done
+
+    def workers(self, queue, dest, cpus=0):
         """
         Create threads and copy
         """
         
-        from threading import Thread
-        from shutil import copy
-        if cpu == 0:
-            cpu = self.get_num_cores() / 3
-        elif (cpu > self.get_num_cores()):
+
+        if cpus == 0:
+            cpus = self.get_num_cores() / 3
+        elif (cpus > self.get_num_cores()):
             exit()
 
-        while True:
-            file = queue.get()
+        for cpu in range(cpus):
+            self.worker = Thread(target=self.cp, args=(queue, dest))
+            print self.worker
+            self.worker.setDaemon(True)
+            print self.worker
+            self.worker.start()
+            print self.worker
+
+        queue.join()
 
 
 if __name__ == '__main__':
@@ -150,5 +175,7 @@ if __name__ == '__main__':
     #print os.listdir(args.SOURCE[0])
     #for x, y in enumerate(li):
     #    for foo, bar in y.items():
+
     #        print foo, bar
-    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), 3)
+    #while True:
+    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), args.DIRECTORY[0], 3)
