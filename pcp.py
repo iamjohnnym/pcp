@@ -80,8 +80,16 @@ class pcp():
         """
         Build paths and place them in array which can be passed to the queue
         """
-
-        #
+        
+        self.paths = []
+        paths = self.paths
+        #li == list : d == dict
+        for self.d in li:
+            for self.key, self.files in self.d.items():
+                for self.file in self.files:
+                    self.string = '{0}/{1}'.format(self.key, self.file)
+                    paths.append(self.string)
+        return paths
 
     #create thread count
     def get_num_cores(self):
@@ -125,4 +133,4 @@ if __name__ == '__main__':
     #for x, y in enumerate(li):
     #    for foo, bar in y.items():
     #        print foo, bar
-    print li
+    print pcp.build_path(li)
