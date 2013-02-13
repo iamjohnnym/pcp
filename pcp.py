@@ -6,35 +6,123 @@ from shutil import copy
 import os
 
 
-source = '/home/ecko/cptest/from'
-dest = '/home/ecko/cptest/to'
-
-num_threads = 5
-queue = Queue()
-files = os.listdir(source)
-
-def pycp(i, q):
+class pcp():
     """
-    Copy files
+    Parallel Copy - A mutli-threaded copier
     """
-    while True:
-        f = q.get()
-        #print "Thread {0}: Copying {1} to {2}".format(i, f, dest)
-        cp_file = "{0}/{1}".format(source, f)
-        cp = subprocess.call("cp {0} {1}".format(cp_file, dest)
-                       shell=True,
-                       stdout=open('/dev/null', 'w'),
-                       stderr=subprocess.STDOUT)
 
-        #if cp == 0:
-        #    print '{0}: is alive'.format(f)
-        q.task_done()
+    def __init__(self):
+        """
+        Initial menu and set variables
+        """
+        pass
 
-for i in range(num_threads):
-    worker = Thread(target=pycp, args=(i, queue))
-    worker.setDaemon(True)
-    worker.start()
+    def cli_params(self):
+        """
+        CLI params for added features
+        """
 
-for f in files:
-    queue.put(f)
-queue.join()
+        try:
+            import argparse
+        except (ImportError, NotImplementedError):
+            print 'Failed to import argparse module'
+            exit(0)
+
+        self.parser = argparse.ArgumentParser(
+                    description='Parallel Copy - Copy multiple files at once',
+                    )
+
+        parser = self.parser
+
+        parser.add_argument('-v', '--verbose',
+                    action='store_true',
+                    help='Enable Verbose Mode')
+
+        parser.add_argument('SOURCE',
+                    nargs='+',
+                    help='Source location')
+
+        parser.add_argument('DIRECTORY',
+                    nargs='+',
+                    help='Directory location')
+
+        self.args = parser.parse_args()
+        
+        return self.args
+
+
+    #check if path exists
+    def check_path(self, path):
+        """
+        Verify the path exists
+        """
+
+        if os.path.exists(path):
+            return True
+        else:
+            return False
+
+    #get files from source dir
+    def get_files(self, path):
+        """
+        List files in the specified directory
+        """
+        
+        test = []
+        if os.path.isdir(path):
+            for r, d, f in os.walk(path):
+                test.append({r: f})
+            return test
+        else:
+            return 'false'
+    
+    def build_path(self, li):
+        """
+        Build paths and place them in array which can be passed to the queue
+        """
+
+        #
+
+    #create thread count
+    def get_num_cores(self):
+        """
+        Determine the number of cores on the current system
+        """
+
+        # Python 2.6+
+        try:
+            import multiprocessing
+            return multiprocessing.cpu_count()
+        except (ImportError, NotImplementedError):
+            pass
+        
+        # POSIX
+        try:
+            self.cores = int(os.sysconf('SC_NPROCESSORS_ONLN'))
+
+            if self.cores > 0:
+                return self.cores
+        except (AttributeError, ValueError):
+            pass
+
+        # Windows
+        try:
+            self.cores = int(os.environ['NUMBER_OF_PROCESSORS'])
+
+            if self.cores > 0:
+                return self.cores
+        except (KeyError, ValueError):
+            pass
+
+    #
+
+if __name__ == '__main__':
+    pcp = pcp()
+    args = pcp.cli_params()
+    print args.SOURCE[0]
+    li = pcp.get_files(args.SOURCE[0])
+    #print os.listdir(args.SOURCE[0])
+    #for x, y in enumerate(li):
+    #    for foo, bar in y.items():
+    #        print foo, bar
+    print li
