@@ -81,15 +81,20 @@ class pcp():
         Build paths and place them in array which can be passed to the queue
         """
         
+        from Queue import Queue
+
         self.paths = []
+        self.queue = Queue()
+
         paths = self.paths
         #li == list : d == dict
         for self.d in li:
             for self.key, self.files in self.d.items():
                 for self.file in self.files:
                     self.string = '{0}/{1}'.format(self.key, self.file)
-                    paths.append(self.string)
-        return paths
+                    #paths.append(self.string)
+                    self.queue.put(self.string)
+        return self.queue
 
     #create thread count
     def get_num_cores(self):
@@ -122,15 +127,28 @@ class pcp():
         except (KeyError, ValueError):
             pass
 
-    #
+    def workers(self, queue, cpu=0):
+        """
+        Create threads and copy
+        """
+        
+        from threading import Thread
+        from shutil import copy
+        if cpu == 0:
+            cpu = self.get_num_cores() / 3
+        elif (cpu > self.get_num_cores()):
+            exit()
+
+        while True:
+            file = queue.get()
+
 
 if __name__ == '__main__':
     pcp = pcp()
     args = pcp.cli_params()
-    print args.SOURCE[0]
-    li = pcp.get_files(args.SOURCE[0])
+    #li = pcp.get_files(args.SOURCE[0])
     #print os.listdir(args.SOURCE[0])
     #for x, y in enumerate(li):
     #    for foo, bar in y.items():
     #        print foo, bar
-    print pcp.build_path(li)
+    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), 3)
