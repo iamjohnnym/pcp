@@ -74,12 +74,24 @@ class pcp():
         
         test = []
         if os.path.isdir(path):
-            for r, d, f in os.walk(path):
+            for r, d, f in os.walk(os.path.dirname(path)):
                 test.append({r: f})
             return test
         else:
             return 'false'
-    
+
+    def set_path(self, path):
+        """
+        Ensure the path is absolute
+        """
+
+
+        if '~' in path:
+            return os.path.expanduser(path)
+        else:
+            return os.path.abspath(path)
+
+    #build paths
     def build_path(self, li):
         """
         Build paths and place them in array which can be passed to the queue
@@ -94,7 +106,7 @@ class pcp():
         for self.d in li:
             for self.key, self.files in self.d.items():
                 for self.file in self.files:
-                    self.string = '{0}/{1}'.format(self.key, self.file)
+                    self.string = '{0}/{1}'.format(self.set_path(self.key), self.file)
                     self.queue.put(self.string)
         return self.queue
 
@@ -103,6 +115,7 @@ class pcp():
         """
         Determine the number of cores on the current system
         """
+
 
         # Python 2.6+
         try:
@@ -129,24 +142,37 @@ class pcp():
         except (KeyError, ValueError):
             pass
 
-    def cp(self, queue, dest):
+    def check_dir(self, dir_path):
+        """
+        Check if a dir exists and if is dir
+        """
+
+
+        try:
+            os.makedirs(dir_path)
+        except OSError:
+            if not os.path.isdir(dir_path):
+                raise
+                
+
+    def cp(self, queue, source, dest):
         """
         Handle the copying of files
         """
 
 
         while True:
-
-            self.f = queue.get()
-
-            self.dest_path = self.f.replace(self.root, '')
-            self.path = "{0}{1}".format(dest,self.dest_path)
             
-            self.cpy = copy(self.f, self.path)
+            self.f = queue.get()
+            
+            dest = self.set_path(dest)
+            self.dest_path = self.f.replace(source, dest)
+            self.check_dir(os.path.dirname(self.dest_path))
+            self.cpy = copy(self.f, self.dest_path)
 
-            queue.task_done
+            queue.task_done()
 
-    def workers(self, queue, dest, cpus=0):
+    def workers(self, queue, source, dest, cpus=0) :
         """
         Create threads and copy
         """
@@ -158,7 +184,7 @@ class pcp():
             exit()
 
         for cpu in range(cpus):
-            self.worker = Thread(target=self.cp, args=(queue, dest))
+            self.worker = Thread(target=self.cp, args=(queue, source, dest))
             print self.worker
             self.worker.setDaemon(True)
             print self.worker
@@ -178,4 +204,7 @@ if __name__ == '__main__':
 
     #        print foo, bar
     #while True:
-    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), args.DIRECTORY[0], 3)
+    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), pcp.set_path(args.SOURCE[0]), args.DIRECTORY[0], 3)
+    #pcp.check_dir('/home/ecko/testingpcp/')
+    #print pcp.set_path(args.SOURCE[0])
+    #print pcp.set_path(args.DIRECTORY[0])
