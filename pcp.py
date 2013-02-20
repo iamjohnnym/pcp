@@ -11,6 +11,7 @@ class pcp():
     Parallel Copy - A mutli-threaded copier
     """
 
+
     def __init__(self):
         """
         Initial menu and set variables
@@ -21,6 +22,7 @@ class pcp():
         """
         CLI params for added features
         """
+
 
         try:
             import argparse
@@ -38,12 +40,17 @@ class pcp():
                     action='store_true',
                     help='Enable Verbose Mode')
 
+        parser.add_argument('-c', '--cpu',
+                    default=0,
+                    type=int,
+                    help='Specify the number of CPU cores to use')
+
         parser.add_argument('SOURCE',
                     nargs='+',
                     help='Source location')
 
         parser.add_argument('DIRECTORY',
-                    nargs='+',
+                    nargs=1,
                     help='Directory location')
 
         self.args = parser.parse_args()
@@ -61,6 +68,7 @@ class pcp():
         Verify the path exists
         """
 
+
         if os.path.exists(path):
             return True
         else:
@@ -72,6 +80,7 @@ class pcp():
         List files in the specified directory
         """
         
+
         test = []
         if os.path.isdir(path):
             for r, d, f in os.walk(os.path.dirname(path)):
@@ -165,9 +174,13 @@ class pcp():
             
             self.f = queue.get()
             
+            #set abs pathing
             dest = self.set_path(dest)
+            #change file path from original path to dest path
             self.dest_path = self.f.replace(source, dest)
+            #ensure dir's exist and create it if not
             self.check_dir(os.path.dirname(self.dest_path))
+            #shutil.copy for copying
             self.cpy = copy(self.f, self.dest_path)
 
             queue.task_done()
@@ -177,10 +190,11 @@ class pcp():
         Create threads and copy
         """
         
-
+        self.cores = self.get_num_cores()
         if cpus == 0:
-            cpus = self.get_num_cores() / 3
-        elif (cpus > self.get_num_cores()):
+            cpus = self.cores / 3
+        elif cpus > self.cores:
+            print "You can set a max of {0} CPU's to use.".format(self.cores)
             exit()
 
         for cpu in range(cpus):
@@ -197,14 +211,4 @@ class pcp():
 if __name__ == '__main__':
     pcp = pcp()
     args = pcp.cli_params()
-    #li = pcp.get_files(args.SOURCE[0])
-    #print os.listdir(args.SOURCE[0])
-    #for x, y in enumerate(li):
-    #    for foo, bar in y.items():
-
-    #        print foo, bar
-    #while True:
-    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), pcp.set_path(args.SOURCE[0]), args.DIRECTORY[0], 3)
-    #pcp.check_dir('/home/ecko/testingpcp/')
-    #print pcp.set_path(args.SOURCE[0])
-    #print pcp.set_path(args.DIRECTORY[0])
+    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), pcp.set_path(args.SOURCE[0]), args.DIRECTORY[0], args.cpu)
