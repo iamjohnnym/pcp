@@ -16,6 +16,7 @@ user    0m0.193s
 sys 0m23.680s
 
 $ time python pcp.py ~/cptest/from/ ~/cptest/to/
+Starting the copy with 5 threads.
 
 real    0m17.802s
 user    0m5.408s
@@ -36,6 +37,7 @@ user    0m0.274s
 sys 0m30.149s
 
 $ time python pcp.py ~/cptest/from/ ~/cptest/to/
+Starting the copy with 5 threads.
 
 real    0m24.000s
 user    0m4.449s
@@ -58,6 +60,7 @@ user    0m0.218s
 sys 0m21.244s
 
 $ time python pcp.py ~/cptest/from/ ~/cptest/to/
+Starting the copy with 5 threads.
 
 real    0m12.946s
 user    0m4.235s
