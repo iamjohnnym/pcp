@@ -1,10 +1,9 @@
-pcp - Parallel Copy
+#pcp - Parallel Copy
 
-When single threads just aren't enough!
+#### When single threads just aren't enough!
 
 
-
-Single level copying 20 files
+### Single level copying 20 files
 
 $ du -h ~/cptest/from/
 9.8G /home/ecko/cptest/from/
@@ -23,7 +22,7 @@ user    0m5.408s
 sys 0m42.321s
 
 
-Multi level copying 20 files in each dir
+### Multi level copying 20 files in each dir
 
 $ du -h ~/cptest/from/
 1.2G    /home/ecko/cptest/from/level_one/level_two
@@ -44,7 +43,7 @@ user    0m4.449s
 sys 0m43.357s
 
 
-Multi level  copying 100 files in each dir 20G each
+### Multi level  copying 100 files in each dir 20G each
 
 $ du -h ./from/
 2.0G    ./from/level_one/level_two/level_three
@@ -65,4 +64,3 @@ Starting the copy with 5 threads.
 real    0m12.946s
 user    0m4.235s
 sys 0m38.593s
-
