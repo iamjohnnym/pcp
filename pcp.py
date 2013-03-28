@@ -61,8 +61,6 @@ class pcp():
         
         return self.args
 
-
-    #check if path exists
     def check_path(self, path):
         """
         Verify the path exists
@@ -74,7 +72,6 @@ class pcp():
         else:
             return False
 
-    #get files from source dir
     def get_files(self, path):
         """
         List files in the specified directory
@@ -100,7 +97,6 @@ class pcp():
         else:
             return os.path.abspath(path)
 
-    #build paths
     def build_path(self, li):
         """
         Build paths and place them in array which can be passed to the queue
@@ -119,7 +115,6 @@ class pcp():
                     self.queue.put(self.string)
         return self.queue
 
-    #create thread count
     def get_num_cores(self):
         """
         Determine the number of cores on the current system
@@ -197,13 +192,12 @@ class pcp():
             print "You can set a max of {0} CPU's to use.".format(self.cores)
             exit()
 
+        print "Starting the copy with {0} threads.".format(cpus)
+
         for cpu in range(cpus):
             self.worker = Thread(target=self.cp, args=(queue, source, dest))
-            print self.worker
             self.worker.setDaemon(True)
-            print self.worker
             self.worker.start()
-            print self.worker
 
         queue.join()
 
