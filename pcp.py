@@ -11,7 +11,6 @@ class pcp():
     Parallel Copy - A mutli-threaded copier
     """
 
-
     def __init__(self):
         """
         Initial menu and set variables
@@ -22,7 +21,6 @@ class pcp():
         """
         CLI params for added features
         """
-
 
         try:
             import argparse
@@ -58,14 +56,13 @@ class pcp():
         self.root = self.args.SOURCE[0]
 
         root = self.root
-        
+
         return self.args
 
     def check_path(self, path):
         """
         Verify the path exists
         """
-
 
         if os.path.exists(path):
             return True
@@ -76,7 +73,6 @@ class pcp():
         """
         List files in the specified directory
         """
-        
 
         test = []
         if os.path.isdir(path):
@@ -91,7 +87,6 @@ class pcp():
         Ensure the path is absolute
         """
 
-
         if '~' in path:
             return os.path.expanduser(path)
         else:
@@ -101,7 +96,6 @@ class pcp():
         """
         Build paths and place them in array which can be passed to the queue
         """
-        
 
         self.paths = []
         self.queue = Queue()
@@ -111,7 +105,9 @@ class pcp():
         for self.d in li:
             for self.key, self.files in self.d.items():
                 for self.file in self.files:
-                    self.string = '{0}/{1}'.format(self.set_path(self.key), self.file)
+                    self.string = '{0}/{1}'.format(
+                                    self.set_path(self.key),
+                                    self.file)
                     self.queue.put(self.string)
         return self.queue
 
@@ -120,14 +116,13 @@ class pcp():
         Determine the number of cores on the current system
         """
 
-
         # Python 2.6+
         try:
             import multiprocessing
             return multiprocessing.cpu_count()
         except (ImportError, NotImplementedError):
             pass
-        
+
         # POSIX
         try:
             self.cores = int(os.sysconf('SC_NPROCESSORS_ONLN'))
@@ -151,24 +146,21 @@ class pcp():
         Check if a dir exists and if is dir
         """
 
-
         try:
             os.makedirs(dir_path)
         except OSError:
             if not os.path.isdir(dir_path):
                 raise
-                
 
     def cp(self, queue, source, dest):
         """
         Handle the copying of files
         """
 
-
         while True:
-            
+
             self.f = queue.get()
-            
+
             #set abs pathing
             dest = self.set_path(dest)
             #change file path from original path to dest path
@@ -180,11 +172,11 @@ class pcp():
 
             queue.task_done()
 
-    def workers(self, queue, source, dest, cpus=0) :
+    def workers(self, queue, source, dest, cpus=0):
         """
         Create threads and copy
         """
-        
+
         self.cores = self.get_num_cores()
         if cpus == 0:
             cpus = self.cores / 3
@@ -201,8 +193,11 @@ class pcp():
 
         queue.join()
 
-
 if __name__ == '__main__':
     pcp = pcp()
     args = pcp.cli_params()
-    pcp.workers(pcp.build_path(pcp.get_files(args.SOURCE[0])), pcp.set_path(args.SOURCE[0]), args.DIRECTORY[0], args.cpu)
+    pcp.workers(pcp.build_path(pcp.get_files(
+                        args.SOURCE[0])),
+                        pcp.set_path(args.SOURCE[0]),
+                        args.DIRECTORY[0],
+                        args.cpu)
